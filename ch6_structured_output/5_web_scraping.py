@@ -26,11 +26,11 @@ loader = WebBaseLoader("https://www.python-unlimited.com/webscraping/houses.php"
 
 page = loader.load()
 
-print(page[0].page_content)
+#print(page[0].page_content)
 
 classification_prompt = PromptTemplate.from_template(
     """
-Scrape information about every book property the source code I provide you and 
+Scrape information about every property from the source code I provide you and 
 return in structured format.
 
 Source code:
@@ -40,7 +40,6 @@ Source code:
 
 llm = init_chat_model(
     os.getenv("CHAT_MODEL"), 
-    model_provider = os.getenv("MODEL_PROVIDER"),
     temperature = 0
 )
 
@@ -50,7 +49,6 @@ llm_with_structured_output = llm.with_structured_output(PropertyPage)
 chain = classification_prompt | llm_with_structured_output
 
 output = chain.invoke({"input": page[0].page_content}).model_dump()
-
 
 df = pd.json_normalize(output['houses'])
 
