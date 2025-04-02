@@ -13,16 +13,16 @@ from typing import List, Optional
 
 from langchain.chat_models import init_chat_model
 
-class BookDetails(BaseModel):
-    title: str = Field(description="The title of the book")
-    price: float = Field(description="The book's price")
-    availability: str = Field(description="Whether the book is available")
-    rating: int = Field(description="The book's rating")
+class PropertyDetails(BaseModel):
+    location: str = Field(description="The proprty's location")
+    amount_of_bedrooms: int = Field(description="Amount of bedrooms")
+    amount_of_bathrooms: str = Field(description="Amount of bathrooms")
+    price_usd: int = Field(description="The proprty's price in USD")
 
-class BookPage(BaseModel):
-    books: List[BookDetails] = Field(description="Details about each book")
+class PropertyPage(BaseModel):
+    houses: List[PropertyDetails] = Field(description="Details about property")
 
-loader = WebBaseLoader("https://books.toscrape.com/",default_parser="html.parser")
+loader = WebBaseLoader("https://www.python-unlimited.com/webscraping/houses.php")
 
 page = loader.load()
 
@@ -30,7 +30,7 @@ print(page[0].page_content)
 
 classification_prompt = PromptTemplate.from_template(
     """
-Scrape information about every book from the source code I provide you and 
+Scrape information about every book property the source code I provide you and 
 return in structured format.
 
 Source code:
@@ -45,17 +45,13 @@ llm = init_chat_model(
 )
 
 
-llm_with_structured_output = llm.with_structured_output(BookPage)
+llm_with_structured_output = llm.with_structured_output(PropertyPage)
 
 chain = classification_prompt | llm_with_structured_output
 
 output = chain.invoke({"input": page[0].page_content}).model_dump()
 
 
-print(output)
+df = pd.json_normalize(output['houses'])
 
-exit()
-
-df = pd.json_normalize(output['books'])
-
-df.to_excel("books.xlsx",index=False)
+df.to_excel("properties.xlsx",index=False)
