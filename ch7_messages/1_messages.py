@@ -14,7 +14,7 @@ messages = [
 
 llm = init_chat_model(
     os.getenv("CHAT_MODEL"), 
-    temperature = 1
+    temperature = 0.5
 )
 
 output = llm.invoke(messages)
